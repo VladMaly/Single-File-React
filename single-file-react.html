@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Testing React</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+
+        function Details(props) {
+            if (!props.show) {
+                return null;
+            }
+
+            return (
+                <div>- {props.data}</div>
+            );
+
+        }
+
+        function Wrapper(props) {
+            return (
+                <div style={{border: '1px solid rgb(97, 218, 251)', marginTop: '5px',  padding: '5px'}}>
+                    {props.children}
+                </div>
+            );
+
+        }
+
+        class Characters extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    charList: props.list,
+                    showDetails: false
+                };
+                this.styleAttrs = {color: 'rgb(97, 218, 251)', backgroundColor: 'black', fontWeight: 'bold'};
+                this.toggleShowDetails = this.toggleShowDetails.bind(this);
+            }
+
+            toggleShowDetails() {
+                this.setState(prevState => ({
+                    showDetails: !prevState.showDetails
+                }));
+
+                // I used arrow function above, could have also been written using a function, as commented out below
+
+                // this.setState(function (prevState) {
+                //     let newState = prevState;
+                //     newState.showAll = !newState.showAll;
+                //     return {
+                //         newState
+                //     }
+                // });
+
+            }
+            render() {
+                return (
+                    <React.Fragment>
+                        <h3>
+                            The DataSet page intends to show inline conditioning, handling events, spread attributes, 
+                            and Tranclusion/Wrapping around the contents.
+                        </h3>
+                        <button 
+                            style={{...this.styleAttrs}}
+                            onClick={this.toggleShowDetails}>
+                                Show More Details
+                        </button>
+                        <Wrapper id='wrapperElm'>
+                            <h2>{this.state.charList.length > 0 ? 'Click on button to see more info.' : 'There is no data.'}</h2>
+                                {this.state.charList.length > 0 && this.state.charList.map((character) =>
+                                    <div key={character.id}>
+                                        <div>{character.name}</div><Details show={this.state.showDetails} data={character.from}></Details>
+                                    </div>
+                                )}
+                        </Wrapper>
+                    </React.Fragment>
+                );
+            }
+        }
+
+        const charList = [
+            {id : 1, name: 'Queen Cersei', from: 'Game of Thrones'},
+            {id : 2, name: 'Adrian Veidt(Ozymandias)', from: 'Watchmen'},
+            {id : 3, name: 'Scott Pilgrim', from:'Scott pilgrim against the world'}
+        ];
+
+        function HomePageText() {
+            return (
+                <div>
+                    <h3 style={{color:'green'}}>
+                        This is a basic single-file React webpage without external css or other files, needs internet connection to build on the fly.
+                        Utilizing React routing and serves as an example of the foundational pricinples of React programming.
+                        JSX built with Babel.
+                    </h3>
+                </div>
+            );
+        }
+
+        class FormTest extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    name: 'Carl Van Loon',
+                    secondName: 'Limitless'
+                };
+
+                this.setFistName = this.setFistName.bind(this);
+            }
+
+            componentDidMount() {
+                ReactDOM.findDOMNode(this.refs.defaultInput).focus();
+            }
+
+            setFistName() {
+                this.setState(() => ({
+                    name: 'Eddie Morra'
+                }));
+                ReactDOM.findDOMNode(this.refs.givenName).focus();
+
+            }
+
+            updateName(e) {
+                this.setState({
+                    name: e.target.value
+                    // name: this.refs.givenName.value
+                });
+            }
+
+            updateField(e) {
+                this.setState({
+                    // secondName: e.target.value
+                    secondName: this.refs.defaultInput.value
+                });
+            }
+
+            render() {
+                return (
+                    <React.Fragment>
+                        <h3>The Input field page intends building forms with
+                        React based lifecycle events, refs, on basic input 
+                        fields involving update and setting. Also offers as 
+                        an example in comparison to the next component 'FormPage' 
+                        which uses HOC to do similar functionality.</h3>
+                        <input
+                            value={this.state.name}
+                            ref='givenName'
+                            onChange={this.updateName.bind(this)}
+                            type="text"
+                        />
+
+                        <input
+                            value={this.state.secondName}
+                            ref='defaultInput'
+                            onChange={this.updateField.bind(this)}
+                            type="text"
+                        />
+                        
+                        <button onClick={this.setFistName}>
+                            Set Name
+                        </button>
+                    </React.Fragment>
+                );
+            }
+        }
+
+        function InputField(defaultInput, customClickEvent = null) {
+            return class extends React.Component {
+                constructor(props) {
+                    super(props);
+                    this.state = {
+                        startingInput: defaultInput
+                    };
+                    
+                }
+
+                updateField(e) {
+                    this.setState({
+                        startingInput: e.target.value
+                    });
+                }
+
+                clickEvent(e) {
+                    if (customClickEvent == null) {
+                        this.setState({
+                            startingInput: e.target.value + 'Extra'
+                        });
+                    } else {
+                        console.log(customClickEvent(e.target.value));
+                        this.setState({
+                            startingInput: customClickEvent(e.target.value)
+                        });
+                    }
+                }
+
+                render() {
+                    return (
+                        <React.Fragment>
+                            <input
+                                type="text"
+                                value={this.state.startingInput}
+                                onChange={this.updateField.bind(this)}
+                                onClick={this.clickEvent.bind(this)}
+                            />
+                        </React.Fragment>
+                    );
+                }
+            }
+        }
+
+        function CustomClickEvent1(currText) {
+            return currText + 'CustomExtra';
+        }
+
+        function InputFields() {
+            const FieldHOC = InputField('Carl Van Loon', CustomClickEvent1);
+            const FieldHOC2 = InputField('Limitless');
+            const FieldHOC3 = InputField('Call Me Ishmael', (currText) => ('Moby Dick'));
+            return (
+                <React.Fragment>
+                    <h3>
+                        The InputHOC intends to show HOC(Higher Order Components)
+                         in comparison to the link above. Added custom click events to two 
+                         of the input fields referenced from outside the class.
+                    </h3>
+                    <FieldHOC />
+                    <FieldHOC2 />
+                    <FieldHOC3 />
+                </React.Fragment>
+            );
+        }
+
+        function OutputScript(props) {
+            return (
+                <textarea rows={props.rows} cols={props.cols}>
+                    {props.text}
+                </textarea>
+            );
+        }
+
+        const HomePage = HomePageText;
+
+        ReactDOM.render(
+            <React.Fragment>
+                <HomePageText />
+                <OutputScript text={HomePage} rows='15' cols='100' />
+                <Characters list={charList}></Characters>
+                <FormTest />
+                <InputFields />
+            </React.Fragment>,
+            document.getElementById('root')
+        );
+
+    </script>
+    <!--
+      Note: this page is a great way to try React but it's not suitable for production.
+      It slowly compiles JSX with Babel in the browser and uses a large development build of React.
+
+      To set up a production-ready React build environment, follow these instructions:
+      * https://reactjs.org/docs/add-react-to-a-new-app.html
+      * https://reactjs.org/docs/add-react-to-an-existing-app.html
+
+      You can also use React without JSX, in which case you can remove Babel:
+      * https://reactjs.org/docs/react-without-jsx.html
+      * https://reactjs.org/docs/cdn-links.html
+    -->
+  </body>
+</html>
